@@ -6,6 +6,7 @@ using System.Reflection.Emit;
 using HarmonyLib;
 using NitroxClient.MonoBehaviours.Overrides;
 using NitroxModel.Helper;
+using NitroxModel.Platforms;
 
 namespace NitroxPatcher.Patches.Dynamic
 {
@@ -75,7 +76,7 @@ namespace NitroxPatcher.Patches.Dynamic
                     CodeInstruction jmpInstruction = instructions[i + 1];
 
                     // Validate that it is what we are looking for
-                    Validate.IsTrue(JUMP_INSTRUCTION_TO_COPY == jmpInstruction.opcode, "Looks like subnautica code has changed.  Update jump offset!");
+                    Validate.IsTrue(JUMP_INSTRUCTION_TO_COPY == jmpInstruction.opcode, $"Looks like {GameInfo.Subnautica.Name} code has changed. Update jump offset!");
 
                     return jmpInstruction;
                 }

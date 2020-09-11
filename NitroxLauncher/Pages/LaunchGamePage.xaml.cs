@@ -31,14 +31,7 @@ namespace NitroxLauncher.Pages
 
         private async void MultiplayerButton_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                await LauncherLogic.Instance.StartMultiplayerAsync();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString(), "Error while starting in multiplayer mode", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            await LauncherLogic.Instance.StartMultiplayerAsync();
         }
     }
 }

@@ -4,7 +4,6 @@ using HarmonyLib;
 using NitroxClient.GameLogic;
 using NitroxClient.MonoBehaviours;
 using NitroxModel.Core;
-using NitroxModel.DataStructures.Util;
 using NitroxModel.Logger;
 using NitroxModel_Subnautica.Packets;
 using UnityEngine;

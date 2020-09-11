@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using NitroxModel.Platforms;
 
 namespace NitroxModel.Discovery.InstallationFinders
 {
@@ -8,7 +9,7 @@ namespace NitroxModel.Discovery.InstallationFinders
         public string FindGame(List<string> errors = null)
         {
             string currentDirectory = Directory.GetCurrentDirectory();
-            if (File.Exists(Path.Combine(currentDirectory, "Subnautica.exe")))
+            if (File.Exists(Path.Combine(currentDirectory, GameInfo.Subnautica.ExeName)))
             {
                 return currentDirectory;
             }

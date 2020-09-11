@@ -15,7 +15,6 @@ using NitroxModel.Discovery;
 using NitroxModel.Helper;
 using NitroxModel.Logger;
 using NitroxModel.OS;
-using NitroxModel_Subnautica.Helper;
 using NitroxServer;
 using NitroxServer.ConsoleCommands.Processor;
 

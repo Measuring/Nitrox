@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using NitroxModel.Platforms;
 
 namespace NitroxLauncher.Pages
 {
@@ -33,7 +34,7 @@ namespace NitroxLauncher.Pages
                 InitialDirectory = PathToSubnautica,
                 EnsurePathExists = true,
                 IsFolderPicker = true,
-                Title = "Select Subnautica installation directory"
+                Title = $"Select {GameInfo.Subnautica.Name} installation directory"
             };
             using (dialog)
             {
@@ -50,7 +51,7 @@ namespace NitroxLauncher.Pages
             }
             else
             {
-                MessageBox.Show("The selected directory does not contain the required Subnautica.exe file.", "Invalid Subnautica directory", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show($"The selected directory does not contain the required {GameInfo.Subnautica.ExeName} file.", $"Invalid {GameInfo.Subnautica.Name} directory", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 

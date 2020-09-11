@@ -279,7 +279,7 @@ namespace NitroxModel.DataStructures.GameLogic
 
         public static NitroxVector3 ExtractTranslation(ref NitroxMatrix4x4 matrix)
         {
-            NitroxVector3 position;
+            NitroxVector3 position = default;
             position.X = matrix[0, 3];
             position.Y = matrix[1, 3];
             position.Z = matrix[2, 3];
@@ -389,7 +389,7 @@ namespace NitroxModel.DataStructures.GameLogic
 
         public static NitroxVector3 ExtractScale(ref NitroxMatrix4x4 matrix)
         {
-            NitroxVector3 scale;
+            NitroxVector3 scale = default;
             scale.X = NitroxVector3.Length(new NitroxVector3(matrix[0, 0], matrix[0, 1], matrix[0, 2]));
             scale.Y = NitroxVector3.Length(new NitroxVector3(matrix[1, 0], matrix[1, 1], matrix[1, 2]));
             scale.Z = NitroxVector3.Length(new NitroxVector3(matrix[2, 0], matrix[2, 1], matrix[2, 2]));

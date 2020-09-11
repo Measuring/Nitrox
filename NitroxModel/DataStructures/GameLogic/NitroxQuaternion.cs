@@ -63,7 +63,7 @@ namespace NitroxModel.DataStructures.GameLogic
 
 
             float num8 = (m00 + m11) + m22;
-            NitroxQuaternion quaternion;
+            NitroxQuaternion quaternion = default;
             if (num8 > 0f)
             {
                 float num = Mathf.Sqrt(num8 + 1f);
@@ -105,7 +105,7 @@ namespace NitroxModel.DataStructures.GameLogic
 
         public NitroxVector3 ToEuler()
         {
-            NitroxVector3 result;
+            NitroxVector3 result = default;
 
             float test = X * Y + Z * W;
             // singularity at north pole

@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using NitroxModel.Logger;
+using NitroxModel.Platforms.Exceptions;
 
 namespace NitroxLauncher
 {
@@ -49,19 +50,31 @@ namespace NitroxLauncher
 
         private void Application_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-            // If something went wrong. Close the server
-            MainWindow window = (MainWindow)Current.MainWindow;
-            window?.CloseInternalServerAndRemovePatchAsync();
-            Log.Error(e.Exception.GetBaseException().ToString()); // Gets the exception that was unhandled, not the "dispatched unhandled" exception.
-            MessageBox.Show(GetExceptionError(e.Exception), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            // Do not crash the app on certain exceptions.
+            e.Handled = e.Exception switch
+            {
+                PlatformException _ => true,
+                OperationCanceledException _ => true,
+                _ => false
+            };
+
+            // If something went seriously wrong. Close embedded server too.
+            if (!e.Handled)
+            {
+                MainWindow window = (MainWindow)Current.MainWindow;
+                window?.CloseInternalServerAndRemovePatchAsync();
+            }
+            
+            Log.Error(e.Exception.ToString());
+            MessageBox.Show(GetExceptionMessageByEnvironment(e.Exception), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
-        private string GetExceptionError(Exception e)
+        private string GetExceptionMessageByEnvironment(Exception e)
         {
 #if RELEASE
-            return e.GetBaseException().Message;
+            return e.Message;
 #else
-            return e.GetBaseException().ToString();
+            return e.ToString();
 #endif
         }
     }

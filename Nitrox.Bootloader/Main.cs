@@ -10,6 +10,13 @@ namespace Nitrox.Bootloader
     {
         private static readonly Lazy<string> nitroxLauncherDir = new Lazy<string>(() =>
         {
+            // Get path from environment variable.
+            string envPath = Environment.GetEnvironmentVariable("NITROX_LAUNCHER_PATH");
+            if (envPath != null && Directory.Exists(envPath))
+            {
+                return envPath;
+            }
+            
             // Get path from command args.
             string[] args = Environment.GetCommandLineArgs();
             for (int i = 0; i < args.Length - 1; i++)
@@ -97,7 +104,7 @@ namespace Nitrox.Bootloader
         private static Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args)
         {
             string dllFileName = args.Name.Split(',')[0];
-            if (!dllFileName.EndsWith(".dll"))
+            if (!dllFileName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
             {
                 dllFileName += ".dll";
             }

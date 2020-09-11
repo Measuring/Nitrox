@@ -19,6 +19,7 @@
     <Optimize>false</Optimize>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32bit>false</Prefer32bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -26,6 +27,7 @@
     <Optimize>true</Optimize>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32bit>false</Prefer32bit>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />

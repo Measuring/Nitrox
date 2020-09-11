@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -15,20 +16,22 @@ using NitroxLauncher.Patching;
 using NitroxModel;
 using NitroxModel.Helper;
 using NitroxModel.Logger;
+using NitroxModel.Platforms;
+using NitroxModel.System;
+using NitroxModel.System.Debug;
 
 namespace NitroxLauncher
 {
     public class LauncherLogic : IDisposable, INotifyPropertyChanged
     {
+        public const string RELEASE_PHASE = "ALPHA";
+        private ProcessEx gameProcess;
+        private bool isEmbedded;
+        private NitroxEntryPatch nitroxEntryPatch;
+        private Process serverProcess;
+        private string subnauticaPath;
         public static string Version => Assembly.GetAssembly(typeof(Extensions)).GetName().Version.ToString();
         public static LauncherLogic Instance { get; private set; }
-
-        public const string RELEASE_PHASE = "ALPHA";
-        private NitroxEntryPatch nitroxEntryPatch;
-        private string subnauticaPath;
-        private Process serverProcess;
-        private Process gameProcess;
-        private bool isEmbedded;
 
         public string SubnauticaPath
         {
@@ -54,15 +57,6 @@ namespace NitroxLauncher
 
         public void Dispose()
         {
-            try
-            {
-                nitroxEntryPatch.Remove();
-            }
-            catch (Exception)
-            {
-                // Ignored
-            }
-
             gameProcess?.Dispose();
             serverProcess?.Dispose();
             serverProcess = null; // Indicate the process is dead now.
@@ -87,21 +81,23 @@ namespace NitroxLauncher
         public async void CheckNitroxVersion()
         {
             await Task.Factory.StartNew(() =>
-            {
-                Version latestVersion = WebHelper.GetNitroxLatestVersion();
-                Version currentVersion = new Version(Version);
+                                        {
+                                            Version latestVersion = WebHelper.GetNitroxLatestVersion();
+                                            Version currentVersion = new Version(Version);
 
-                if (latestVersion > currentVersion)
-                {
-                    MessageBox.Show($"A new version of the mod ({latestVersion}) is available !\n\nPlease check our website to download it",
-                        "New version available",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Question,
-                        MessageBoxResult.OK,
-                        MessageBoxOptions.DefaultDesktopOnly);
-                }
-
-            }, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
+                                            if (latestVersion > currentVersion)
+                                            {
+                                                MessageBox.Show($"A new version of the mod ({latestVersion}) is available !\n\nPlease check our website to download it",
+                                                                "New version available",
+                                                                MessageBoxButton.OK,
+                                                                MessageBoxImage.Question,
+                                                                MessageBoxResult.OK,
+                                                                MessageBoxOptions.DefaultDesktopOnly);
+                                            }
+                                        },
+                                        CancellationToken.None,
+                                        TaskCreationOptions.None,
+                                        TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         public async Task<string> SetTargetedSubnauticaPath(string path)
@@ -113,25 +109,25 @@ namespace NitroxLauncher
             SubnauticaPath = path;
 
             return await Task.Factory.StartNew(() =>
-                {
-                    PirateDetection.TriggerOnDirectory(path);
-                    File.WriteAllText("path.txt", path);
-                    if (nitroxEntryPatch?.IsApplied == true)
-                    {
-                        nitroxEntryPatch.Remove();
-                    }
-                    nitroxEntryPatch = new NitroxEntryPatch(path);
+                                               {
+                                                   PirateDetection.TriggerOnDirectory(path);
+                                                   File.WriteAllText("path.txt", path);
+                                                   if (nitroxEntryPatch?.IsApplied == true)
+                                                   {
+                                                       nitroxEntryPatch.Remove();
+                                                   }
+                                                   nitroxEntryPatch = new NitroxEntryPatch(path);
 
-                    if (Path.GetFullPath(path).StartsWith(AppHelper.ProgramFileDirectory, StringComparison.OrdinalIgnoreCase))
-                    {
-                        AppHelper.RestartAsAdmin();
-                    }
+                                                   if (Path.GetFullPath(path).StartsWith(AppHelper.ProgramFileDirectory, StringComparison.OrdinalIgnoreCase))
+                                                   {
+                                                       AppHelper.RestartAsAdmin();
+                                                   }
 
-                    return path;
-                },
-                CancellationToken.None,
-                TaskCreationOptions.None,
-                TaskScheduler.FromCurrentSynchronizationContext());
+                                                   return path;
+                                               },
+                                               CancellationToken.None,
+                                               TaskCreationOptions.None,
+                                               TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -176,7 +172,7 @@ namespace NitroxLauncher
             }
 
             return Directory.EnumerateFileSystemEntries(directory, "*.exe")
-                .Any(file => Path.GetFileName(file)?.Equals("subnautica.exe", StringComparison.OrdinalIgnoreCase) ?? false);
+                            .Any(file => Path.GetFileName(file)?.Equals(GameInfo.Subnautica.ExeName, StringComparison.OrdinalIgnoreCase) ?? false);
         }
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -187,43 +183,42 @@ namespace NitroxLauncher
         internal async Task StartSingleplayerAsync()
         {
 #if RELEASE
-            if (Process.GetProcessesByName("Subnautica").Length > 0)
+            if (Process.GetProcessesByName(GameInfo.Subnautica.Name).Length > 0)
             {
-                throw new Exception("An instance of Subnautica is already running");
+                throw new Exception($"An instance of {GameInfo.Subnautica.Name} is already running");
             }
 #endif
-            nitroxEntryPatch.Remove();
-            gameProcess = StartSubnautica() ?? await WaitForProcessAsync();
+            gameProcess = await StartSubnauticaAsync();
         }
 
         internal async Task StartMultiplayerAsync()
         {
 #if RELEASE
-            if (Process.GetProcessesByName("Subnautica").Length > 0)
+            if (Process.GetProcessesByName(GameInfo.Subnautica.Name).Length > 0)
             {
-                throw new Exception("An instance of Subnautica is already running");
+                throw new Exception($"An instance of {GameInfo.Subnautica.Name} is already running");
             }
 #endif
             // Store path where launcher is in AppData for Nitrox bootstrapper to read
-            string nitroxAppData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Nitrox");
-            Directory.CreateDirectory(nitroxAppData);
-            File.WriteAllText(Path.Combine(nitroxAppData, "launcherpath.txt"), Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+            // string nitroxAppData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Nitrox");
+            // Directory.CreateDirectory(nitroxAppData);
+            // File.WriteAllText(Path.Combine(nitroxAppData, "launcherpath.txt"), Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+            //
+            // // TODO: The launcher should override FileRead win32 API for the Subnautica process to give it the modified Assembly-CSharp from memory 
+            // string bootloaderName = "Nitrox.Bootloader.dll";
+            // try
+            // {
+            //     File.Copy(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "lib", bootloaderName), Path.Combine(subnauticaPath, "Subnautica_Data", "Managed", bootloaderName), true);
+            // }
+            // catch (IOException ex)
+            // {
+            //     Log.Error(ex, "Unable to move bootloader dll to Managed folder. Still attempting to launch because it might exist from previous runs.");
+            // }
+            //
+            // nitroxEntryPatch.Remove(); // Remove any previous instances first.
+            // nitroxEntryPatch.Apply();
 
-            // TODO: The launcher should override FileRead win32 API for the Subnautica process to give it the modified Assembly-CSharp from memory 
-            string bootloaderName = "Nitrox.Bootloader.dll";
-            try
-            {
-                File.Copy(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "lib", bootloaderName), Path.Combine(subnauticaPath, "Subnautica_Data", "Managed", bootloaderName), true);
-            }
-            catch (IOException ex)
-            {
-                Log.Error(ex, "Unable to move bootloader dll to Managed folder. Still attempting to launch because it might exist from previous runs.");
-            }
-
-            nitroxEntryPatch.Remove(); // Remove any previous instances first.
-            nitroxEntryPatch.Apply();
-
-            gameProcess = StartSubnautica() ?? await WaitForProcessAsync();
+            gameProcess = await StartSubnauticaAsync();
         }
 
         internal Process StartServer(bool standalone)
@@ -274,7 +269,7 @@ namespace NitroxLauncher
 
         private void OnEndServer()
         {
-            ServerExited?.Invoke(serverProcess, new EventArgs());
+            ServerExited?.Invoke(serverProcess, EventArgs.Empty);
             isEmbedded = false;
         }
 
@@ -283,28 +278,62 @@ namespace NitroxLauncher
             ServerDataReceived?.Invoke(sender, e);
         }
 
-        private Process StartSubnautica()
+        private async Task<ProcessEx> StartSubnauticaAsync()
         {
-            string subnauticaExe = Path.Combine(subnauticaPath, "Subnautica.exe");
-            ProcessStartInfo startInfo = new ProcessStartInfo
+            // Start game & gaming platform if needed.
+            string subnauticaExe = Path.Combine(subnauticaPath, GameInfo.Subnautica.ExeName);
+            using ProcessDebugger debug = GamePlatforms.GetPlatformByGameDir(subnauticaPath) switch
             {
-                WorkingDirectory = subnauticaPath,
-                FileName = subnauticaExe
+                Steam s => await s.StartGameAsync(subnauticaExe, GameInfo.Subnautica.SteamAppId, false),
+                _ => throw new Exception($"Directory '{subnauticaPath}' is not a valid {GameInfo.Subnautica.Name} game installation or the game's platform is unsupported.")
             };
-
-            if (PlatformDetection.IsEpic(subnauticaPath))
+            
+            // TODO: Set breakpoint on CreateFileW to change register values when Assembly-CSharp.dll is accessed.
+            debug.EntrypointBreak += (sender, args) =>
             {
-                startInfo.Arguments = "-EpicPortal -vrmode none";
-            }
-            else if (PlatformDetection.IsSteam(subnauticaPath))
+                ProcessEx proc = sender.Process;
+                IntPtr createFileW = proc.GetAddress("kernel32.dll", "CreateFileW");
+                Log.Debug($"kernel32.dll.CreateFileW: 0x{createFileW.ToString("X")}");
+                
+                sender.AddBreakpoint(createFileW);
+            };
+            debug.BreakpointHit += (sender, context) =>
             {
-                startInfo.FileName = "steam://run/264710";
-            }
-            else if (PlatformDetection.IsMicrosoftStore(subnauticaPath))
-            {
-                startInfo.FileName = "ms-xbl-38616e6e:\\";
-            }
-            return Process.Start(startInfo);
+                string file = sender.Process.ReadString(context.ThreadContext.Rcx, Encoding.Unicode);
+                if (file.IndexOf("Assembly-CSharp.dll", StringComparison.InvariantCultureIgnoreCase) > -1)
+                {
+                    Log.Debug($"CreateFileW: {file}");
+                    context.DebuggerOptions.StopDebugging();
+                }
+                else
+                {
+                    Log.Debug($"NOPE: {file}");
+                }
+            };
+            await debug.StartAsync();
+            await debug.WaitForDebuggerExit();
+            return null;
+            
+            // if (PlatformDetection.IsEpic(subnauticaPath))
+            // {
+            //     startInfo.Arguments = "-EpicPortal -vrmode none";
+            // }
+            // else if (PlatformDetection.IsSteam(subnauticaPath))
+            // {
+            //     return await Steam.Instance.StartGameAsync(subnauticaExe, SteamGameRegistryFinder.SUBNAUTICA_APP_ID);
+            // }
+            // else if (PlatformDetection.IsMicrosoftStore(subnauticaPath))
+            // {
+            //     startInfo.FileName = "ms-xbl-38616e6e:\\";
+            // }
+            //
+            // Process proc = Process.Start(startInfo);
+            // while (proc != null && string.IsNullOrEmpty(proc.MainWindowTitle))
+            // {
+            //     await Task.Delay(100);
+            //     proc.Refresh();
+            // }
+            // return proc;
         }
 
         private void OnStartServer(bool embedded)
@@ -324,41 +353,6 @@ namespace NitroxLauncher
                 MessageBox.Show(ex.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             Log.Info("Finished removing patches!");
-        }
-
-        private async Task<Process> WaitForProcessAsync()
-        {
-            if (gameProcess != null)
-            {
-                return gameProcess;
-            }
-
-            return await Task.Run(async () =>
-                {
-                    int waitTimeInMill = 1000;
-                    for (int i = 0; i < 1000; i++)
-                    {
-                        Process[] processes = Process.GetProcessesByName("Subnautica");
-                        if (processes.Length == 1)
-                        {
-                            return processes[0];
-                        }
-
-                        await Task.Delay(waitTimeInMill);
-                    }
-                    if (gameProcess == null)
-                    {
-                        Log.Error("No or multiple subnautica processes found. Cannot remove patches after exited.");
-                    }
-                    return null;
-                })
-                .ContinueWith(task =>
-                    {
-                        Process proc = task.Result;
-                        proc.Exited += OnSubnauticaExited;
-                        return proc;
-                    },
-                    TaskContinuationOptions.OnlyOnRanToCompletion);
         }
     }
 }

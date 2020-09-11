@@ -1,10 +1,11 @@
-﻿using NitroxModel.DataStructures.GameLogic;
+﻿using System;
+using NitroxModel.DataStructures.GameLogic;
 
 namespace NitroxModel.MultiplayerSession
 {
     public static class RandomColorGenerator
     {
-        private static readonly System.Random random = new System.Random();
+        private static readonly Random random = new Random();
 
         public static NitroxColor GenerateColor()
         {

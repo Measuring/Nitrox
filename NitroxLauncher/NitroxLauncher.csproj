@@ -21,6 +21,7 @@
     <Optimize>false</Optimize>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32bit>false</Prefer32bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -28,6 +29,7 @@
     <Optimize>true</Optimize>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32bit>false</Prefer32bit>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>
@@ -85,7 +87,6 @@
       <DependentUpon>ServerPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Patching\NitroxEntryPatch.cs" />
-    <Compile Include="Patching\PlatformDetection.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
