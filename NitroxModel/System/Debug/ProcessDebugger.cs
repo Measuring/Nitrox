@@ -87,12 +87,17 @@ namespace NitroxModel.System.Debug
                                     }
                                 }
                                 break;
+                            case DebugEventType.LOAD_DLL_DEBUG_EVENT:
+                                // LoadDllDebugInfo loadDllEvt = evt.DebugInfo.LoadDll;
+                                // Encoding nameEncoding = loadDllEvt.fUnicode == 0 ? Encoding.ASCII : Encoding.Unicode;
+                                // Log.Debug($"DLL loaded: {process.ReadString(loadDllEvt.lpImageName, nameEncoding)}");
+                                break;
                             case DebugEventType.EXCEPTION_DEBUG_EVENT:
-                                IntPtr exceptionAddress = evt.DebugInfo.Exception.ExceptionRecord.ExceptionAddress;
-                                switch (evt.DebugInfo.Exception.ExceptionRecord.ExceptionCode)
+                                DebugExceptionRecord64 exceptionEvt = evt.DebugInfo.Exception.ExceptionRecord;
+                                switch (exceptionEvt.ExceptionCode)
                                 {
                                     case DebugExceptionCode.EXCEPTION_BREAKPOINT:
-                                        if (activeBreakpoints.TryGetValue(exceptionAddress, out Breakpoint breakpoint))
+                                        if (activeBreakpoints.TryGetValue(exceptionEvt.ExceptionAddress, out Breakpoint breakpoint))
                                         {
                                             // TODO: Implement next-stepping instead of "breakpointsToApply".
                                             ThreadContext64 ctx = process.GetThreadContext((int)evt.dwThreadId);
@@ -110,7 +115,7 @@ namespace NitroxModel.System.Debug
                                         }
                                         break;
                                     default:
-                                        Log.Debug($"Native exception {evt.DebugInfo.Exception.ExceptionRecord.ExceptionCode.ToString()} occurred at: 0x{exceptionAddress.ToString("X")}");
+                                        Log.Debug($"Native exception {exceptionEvt.ExceptionCode.ToString()} occurred at: 0x{exceptionEvt.ExceptionAddress.ToString("X")}");
                                         break;
                                 }
                                 break;

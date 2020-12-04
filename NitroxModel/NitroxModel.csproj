@@ -246,7 +246,7 @@
     <Compile Include="System\Windows\Debug\DebugInfo64.cs" />
     <Compile Include="System\Windows\Debug\ThreadContext64.cs" />
     <Compile Include="System\Windows\Debug\ContinueStatus.cs" />
-    <Compile Include="System\Windows\Debug\CreateProcessDebugInfo.cs" />
+    <Compile Include="System\Windows\Debug\CreateProcessDebugInfo64.cs" />
     <Compile Include="System\Windows\Debug\CreateThreadDebugInfo.cs" />
     <Compile Include="System\Windows\Debug\DebugEvent64.cs" />
     <Compile Include="System\Windows\Debug\DebugEventType.cs" />
@@ -278,9 +278,6 @@
     <Compile Include="System\Windows\SecurityAttributes.cs" />
     <Compile Include="System\Windows\SnapshotFlags.cs" />
     <Compile Include="System\Windows\StartupInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LiteNetLib\LiteNetLib\LiteNetLib.csproj">

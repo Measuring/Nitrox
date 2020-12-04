@@ -300,14 +300,10 @@ namespace NitroxLauncher
             debug.BreakpointHit += (sender, context) =>
             {
                 string file = sender.Process.ReadString(context.ThreadContext.Rcx, Encoding.Unicode);
+                Log.Debug($"CreateFileW: {file}");
                 if (file.IndexOf("Assembly-CSharp.dll", StringComparison.InvariantCultureIgnoreCase) > -1)
                 {
-                    Log.Debug($"CreateFileW: {file}");
                     context.DebuggerOptions.StopDebugging();
-                }
-                else
-                {
-                    Log.Debug($"NOPE: {file}");
                 }
             };
             await debug.StartAsync();
