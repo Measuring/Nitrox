@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using NitroxModel.Platforms;
+using NitroxModel.Platforms.Gaming;
 
 namespace NitroxModel.Discovery.InstallationFinders
 {

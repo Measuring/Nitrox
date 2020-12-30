@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using NitroxModel.Core;
 using NitroxModel.DataStructures.GameLogic;
 using NitroxModel.Logger;
-using NitroxModel.OS;
+using NitroxModel.Platforms.OS;
 using NitroxModel.Serialization;
 using NitroxServer.ConsoleCommands.Abstract;
 using NitroxServer.Serialization;

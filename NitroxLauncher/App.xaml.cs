@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using NitroxModel.Logger;
-using NitroxModel.Platforms.Exceptions;
+using NitroxModel.Platforms.Gaming.Exceptions;
 
 namespace NitroxLauncher
 {

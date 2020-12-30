@@ -17,8 +17,9 @@ using NitroxModel;
 using NitroxModel.Helper;
 using NitroxModel.Logger;
 using NitroxModel.Platforms;
-using NitroxModel.System;
-using NitroxModel.System.Debug;
+using NitroxModel.Platforms.Gaming;
+using NitroxModel.Platforms.OS.Windows;
+using NitroxModel.Platforms.OS.Windows.Debug;
 
 namespace NitroxLauncher
 {
@@ -284,7 +285,7 @@ namespace NitroxLauncher
             string subnauticaExe = Path.Combine(subnauticaPath, GameInfo.Subnautica.ExeName);
             using ProcessDebugger debug = GamePlatforms.GetPlatformByGameDir(subnauticaPath) switch
             {
-                Steam s => await s.StartGameAsync(subnauticaExe, GameInfo.Subnautica.SteamAppId, false),
+                Steam s => await s.StartGameAsync(subnauticaExe, GameInfo.Subnautica.SteamId, false),
                 _ => throw new Exception($"Directory '{subnauticaPath}' is not a valid {GameInfo.Subnautica.Name} game installation or the game's platform is unsupported.")
             };
             

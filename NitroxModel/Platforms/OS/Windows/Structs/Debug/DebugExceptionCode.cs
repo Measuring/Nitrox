@@ -1,0 +1,13 @@
+﻿namespace NitroxModel.Platforms.OS.Windows.Structs.Debug
+{
+    public enum DebugExceptionCode : uint
+    {
+        EXCEPTION_BREAKPOINT = 0x80000003,
+        EXCEPTION_ACCESS_VIOLATION = 0xC0000005,
+        EXCEPTION_DATATYPE_MISALIGNMENT = 0x80000002,
+        EXCEPTION_SINGLE_STEP = 0x80000004,
+        EXCEPTION_ARRAY_BOUNDS_EXCEEDED = 0xC000008C,
+        EXCEPTION_INT_DIVIDE_BY_ZERO = 0xC0000094,
+        DBG_CONTROL_C = 0x40010006
+    }
+}

@@ -7,6 +7,7 @@ using HarmonyLib;
 using NitroxClient.MonoBehaviours.Overrides;
 using NitroxModel.Helper;
 using NitroxModel.Platforms;
+using NitroxModel.Platforms.Gaming;
 
 namespace NitroxPatcher.Patches.Dynamic
 {

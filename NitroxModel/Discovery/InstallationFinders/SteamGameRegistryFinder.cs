@@ -2,7 +2,8 @@
 using System.IO;
 using System.Text.RegularExpressions;
 using NitroxModel.Platforms;
-using NitroxModel.System.Windows;
+using NitroxModel.Platforms.Gaming;
+using NitroxModel.Platforms.OS.Windows.Structs;
 
 namespace NitroxModel.Discovery.InstallationFinders
 {
@@ -18,12 +19,12 @@ namespace NitroxModel.Discovery.InstallationFinders
             }
 
             string appsPath = Path.Combine(steamPath, "steamapps");
-            if (File.Exists(Path.Combine(appsPath, $"appmanifest_{GameInfo.Subnautica.SteamAppId}.acf")))
+            if (File.Exists(Path.Combine(appsPath, $"appmanifest_{GameInfo.Subnautica.SteamId}.acf")))
             {
                 return Path.Combine(appsPath, "common", GameInfo.Subnautica.Name);
             }
 
-            string path = SearchAllInstallations(Path.Combine(appsPath, "libraryfolders.vdf"), GameInfo.Subnautica.SteamAppId, GameInfo.Subnautica.Name);
+            string path = SearchAllInstallations(Path.Combine(appsPath, "libraryfolders.vdf"), GameInfo.Subnautica.SteamId, GameInfo.Subnautica.Name);
             if (string.IsNullOrEmpty(path))
             {
                 errors?.Add($"It appears you don't have {GameInfo.Subnautica.Name} installed anywhere. The game files are needed to run the server.");

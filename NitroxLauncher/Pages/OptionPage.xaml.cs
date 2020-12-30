@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using NitroxModel.Platforms;
+using NitroxModel.Platforms.Gaming;
 
 namespace NitroxLauncher.Pages
 {
